@@ -27,7 +27,7 @@ resources :posts
 
 This gives us access to `/authors/:author_id/posts/new`, and a `new_author_post_path` helper.
 
-**Top-tip:** Remember to run `rake routes` if you're unsure of the URL helper name.
+**Top-tip:** Remember to run `bin/rails routes` if you're unsure of the URL helper name.
 
 We have the route, so now we need to update our `posts_controller#new` action to handle the `:author_id` parameter.
 
@@ -56,14 +56,14 @@ Now let's get into our author `show` template and add a link to the nested new p
 <% end %>
 ```
 
-Let's launch the app (don't forget to `rake db:seed`), browse to `/authors`, click on an author's name, and then click the new post link. Once there, let's make a post.
+Let's launch the app (don't forget to run `bin/rails db:seed`), browse to `/authors`, click on an author's name, and then click the new post link. Once there, let's make a post.
 
 Something seems off. Where's our author? Looks like we didn't do a great job babysitting that `author_id`. We set it up in the `new` action, but it never made it to the view so that it could get submitted back to the server. Let's fix that. Open up the post form partial and add a hidden field for the `:author_id`.
 
 ```erb
 <!-- posts/_form.html.erb -->
 
-<%= form_for(@post) do |f| %>
+<%= form_with(model: @post, local: true) do |f| %>
   <label>Post title:</label><br>
 
   <%= f.hidden_field :author_id %>
@@ -101,9 +101,9 @@ Now we know the `author_id` will be allowed for mass-assignment in the `create` 
 
 Let's try it out. Go to an author's new post page, and make a post. We should see the author's name in the byline now!
 
-Why didn't we have to make a nested resource route for `:create` in addition to `:new`? 
+Why didn't we have to make a nested resource route for `:create` in addition to `:new`?
 
-The `form_for(@post)` helper in `posts/_form.html.erb` will automatically route to `POST posts_controller#create` for a new `Post`. By carrying the `author_id` as we did and allowing it through strong parameters, the existing `create` route and action can be used without needing to do anything else.
+The `form_with(model: @post, local: true)` helper in `posts/_form.html.erb` will automatically route to `POST posts_controller#create` for a new `Post`. By carrying the `author_id` as we did and allowing it through strong parameters, the existing `create` route and action can be used without needing to do anything else.
 
 ### Editing An Author's Posts
 
@@ -216,7 +216,7 @@ Since we're already set up to handle `author_id` on the controller, all we have 
 ```erb
 <!-- posts/_form.html.erb -->
 
-<%= form_for(@post) do |f| %>
+<%= form_with(model: @post, local: true) do |f| %>
   <label>Post title:</label><br>
   <% if @post.author.nil? %>
     <%= f.select :author_id, options_from_collection_for_select(Author.all, :id, :name) %><br>
@@ -247,7 +247,7 @@ And back in our form partial:
 ```erb
 <!-- posts/_form.html.erb -->
 
-<%= form_for(@post) do |f| %>
+<%= form_with(model: @post, local: true) do |f| %>
   <%= author_id_field(@post) %>
   <br>
   <label>Post title:</label><br>
@@ -265,4 +265,3 @@ We've seen how to create and edit nested resources, handle for errors or mischie
 You're well on your way to becoming a nested resource ninja!
 
 ![Ninja Baby](http://i.giphy.com/ErdfMetILIMko.gif)
-
